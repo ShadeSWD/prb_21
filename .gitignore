@@ -1,1 +1,8 @@
 #Ignored files:
+====================================
+#File vith results:
+saveit.txt
+------------------------------------
+#Python folders
+.idea/
+venv/

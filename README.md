@@ -1,4 +1,8 @@
-#prb_21#
+#prb_21
 ____
-##commit Hello_world##
+##commit Hello_world
 Added Hello_world.py
+____
+##commit Lesson_1
++ The repository was divided into folders
++ Added files of Lesson_1 (String_length.py, Palindrome.py, diff_symbols.py, problem500A.py, problem266B.py)
