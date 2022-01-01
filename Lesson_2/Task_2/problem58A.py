@@ -1,4 +1,5 @@
 # https://codeforces.com/problemset/problem/58/A
+i = 0
 
 
 def data_input():
@@ -7,17 +8,18 @@ def data_input():
 
 
 def hello_check(word):
+    global i
     key = "hello"
     if len(word) < len(key):
         print('NO')
     else:
-        i5 = word.rfind('o') + 1  # str.rfind(sub[, start[, end]]) -> int
-        i4 = word.rfind('l', 0, i5 - 1) + 1
-        i3 = word.rfind('l', 0, i4 - 1) + 1
-        i2 = word.rfind('e', 0, i3 - 1) + 1
-        i1 = word.rfind('h', 0, i2 - 1) + 1
-        i = i1 * i2 * i3 * i4 * i5
-        print('NO' if i == 0 else 'YES')
+        i = word.rfind(key[-1]) + 1
+        check = i
+        for s in range(len(key) - 1):
+            k = word.rfind(key[- 2 - s], 0, i - 1) + 1
+            i = k
+            check *= k
+        print('NO' if check == 0 else 'YES')
 
 
 def main():

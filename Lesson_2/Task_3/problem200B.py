@@ -1,9 +1,11 @@
 # https://codeforces.com/problemset/problem/200/B
 
+import statistics
+
 
 def main():
     n, concentration = data_input()
-    final = concentration_calculator(n, concentration)
+    final = concentration_calculator(concentration)
     print(final)
 
 
@@ -13,11 +15,8 @@ def data_input():
     return n, concentration
 
 
-def concentration_calculator(n, concentration):
-    juice = 0
-    for i in range(0, n):
-        juice += concentration[i]
-    final = juice/n
+def concentration_calculator(concentration):
+    final = statistics.mean(concentration)
     return final
 
 
