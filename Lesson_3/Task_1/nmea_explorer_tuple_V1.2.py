@@ -1,48 +1,70 @@
+# about NMEA http://wiki.amperka.ru/articles:gps:nmea
+
+
 import re
 import math
+from collections import namedtuple
+
+
 R = 6371  # Earth radius
+Path = "nmea.log"  # if the file is in the same folder
+Point_of_interest = ' Lat: 60.051584° Lon: 30.300509°'  # we got it from the task
+Distance_of_interest = 25
+
+
+def tuple_time_and_position(str_of_data):
+    tuple_time_and_pos = namedtuple('tuple_time_and_pos', 'time lat_pos lat_quadrant lon_pos lon_quadrant')
+    data_file_split = str_of_data.split(',')
+    return tuple_time_and_pos(data_file_split[1], data_file_split[2],
+                              data_file_split[3], data_file_split[4],
+                              data_file_split[5])
 
 
 def get_data():
-    path = "nmea.log"  # if the file is in the same folder
-    file = open(path, 'rt')
-    input_data_file = []
-    data_file = []
-    for line in file:
-        input_data_file.append(line)
-    for s in range(len(input_data_file) - 1):
-        i = check_string(input_data_file[s])
-        if i == 1:
-            data_file.append(input_data_file[s])
+    with open(Path, 'rt') as file:
+        input_data_file = []
+        data_file = []
+        for line in file:
+            input_data_file.append(line)
+        for s in range(len(input_data_file)):
+            if check_string(input_data_file[s]) == 'True':
+                data_file.append(input_data_file[s])
     return data_file
 
 
-def check_string(str_of_data):
-    if len(str_of_data) == 80:
-        i = 1
+def check_string(str_of_data):  # with the use of check sum in the end of the string
+    check_sum = 0
+    if str_of_data[0] != '$':
+        return 'False'
     else:
-        i = 0
-    return i
+        if str_of_data.find('*') == -1:
+            return 'False'
+        else:
+            for i in range(1, str_of_data.rfind('*')):
+                if check_sum == 0:
+                    check_sum = ord(str_of_data[i])
+                else:
+                    check_sum = check_sum ^ ord(str_of_data[i])
+            if str(str_of_data[str_of_data.rfind('*') + 1: -1]).lower() == str(hex(check_sum))[2:4]:
+                return 'True'
+            else:
+                return 'False'
 
 
 def get_time_interval(data_file):
     spot_of_interest = get_spot_of_interest()
     time_interval = 0
     for i in range(len(data_file) - 1):
-        string_of_data = (data_file[i]).split(',')
-        latitude = convert_nmea_to_decimal(string_of_data[2], string_of_data[3])
-        longitude = convert_nmea_to_decimal(string_of_data[4], string_of_data[5])
+        latitude = convert_nmea_to_decimal(tuple_time_and_position(data_file[i]).lat_pos,
+                                           tuple_time_and_position(data_file[i]).lat_quadrant)
+        longitude = convert_nmea_to_decimal(tuple_time_and_position(data_file[i]).lon_pos,
+                                            tuple_time_and_position(data_file[i]).lon_quadrant)
         dist = distance(float(latitude), float(longitude), float(spot_of_interest[0]),
                         float(spot_of_interest[1])) * 1000
-        if dist < int(get_distance_of_interest()):
+        if dist < Distance_of_interest:
             time_bit = get_time_bit(data_file, i)
             time_interval += time_bit
     return time_interval
-
-
-def get_distance_of_interest():
-    distance_of_interest = 25
-    return distance_of_interest
 
 
 #  https://coderoad.ru/36254363/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B5%D0%BE%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-%D1%88%D0%B8%D1%80%D0%BE%D1%82%D1%83-%D0%B8-%D0%B4%D0%BE%D0%BB%D0%B3%D0%BE%D1%82%D1%83-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82%D0%B0-NMEA-%D0%B2-%D0%B4%D0%B5%D1%81%D1%8F%D1%82%D0%B8%D1%87%D0%BD%D1%83%D1%8E
@@ -67,18 +89,16 @@ def get_time_bit(data_file, i):  # different files can get different sampling fr
     if i == 0:
         time_bit = 0
     else:
-        start_time = convert_time_to_seconds(data_file[i - 1])
-        end_time = convert_time_to_seconds(data_file[i])
+        start_time = convert_time_to_seconds(tuple_time_and_position(data_file[i - 1]).time)
+        end_time = convert_time_to_seconds(tuple_time_and_position(data_file[i]).time)
         time_bit = end_time - start_time
     return time_bit
 
 
-def convert_time_to_seconds(str_of_data):
-    spl_str_of_data = str_of_data.split(',')
-    spl_time = spl_str_of_data[1]
-    hours_in_sec = float(spl_time[:2]) * 3600
-    min_in_sec = float(spl_time[2:4]) * 60
-    sec = float(spl_time[4:])
+def convert_time_to_seconds(nmea_time):
+    hours_in_sec = float(nmea_time[:2]) * 3600
+    min_in_sec = float(nmea_time[2:4]) * 60
+    sec = float(nmea_time[4:])
     time_in_sec = hours_in_sec + min_in_sec + sec
     return time_in_sec
 
@@ -92,17 +112,8 @@ def convert_time_to_hhmmss(time_in_sec):
 
 
 def get_spot_of_interest():
-    we_get = ' Lat: 60.051584° Lon: 30.300509°'  # we got it from the task
-    nums = re.findall(r"(?<![a-zA-Z:])[-+]?\d*\.?\d+", we_get)  # extract numbers from the string
-    spot_of_interest = nums  # I've decided to leave it in a decimal format, so I don't use commented below
-    """s = 0
-    while s < 2:
-        split_nums = nums[s].split('.')
-        degrees = split_nums[0]
-        minutes = str(int(split_nums[1]) * 60)
-        minutes = minutes[0:2] + '.' + minutes[1:6]
-        spot_of_interest.append(degrees + str(minutes))
-        s += 1"""
+    nums = re.findall(r"(?<![a-zA-Z:])[-+]?\d*\.?\d+", Point_of_interest)  # extract numbers from the string
+    spot_of_interest = nums  # I've decided to leave it in a decimal format
     return spot_of_interest
 
 
