@@ -22,3 +22,7 @@ ____
   - nmea_explorer_no_tuple_V1.1.py was corrected but doesn't include named tuple
   - nmea_explorer_tuple_V1.2.py contains named tuple of data but works much slower than V1.1
 + Added 2 new problems from https://codeforces.com/problemset?order=BY_SOLVED_DESC
+----
+##commit Lesson_3 version 1.2
++ In C:\prb_21\Lesson_3\Task_1 was added nmea_explorer_pynmeagps_V1.0.py which uses libraries
+----
