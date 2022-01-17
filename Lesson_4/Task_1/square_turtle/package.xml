@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>square_turtle</name>
+  <version>0.0.0</version>
+  <description>The square_turtle package</description>
+
+
+  <maintainer email="arina121002@yandex.ru">Arina Aleevskaya</maintainer>
+
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend> 
+
+</package>
